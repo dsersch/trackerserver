@@ -24,11 +24,16 @@ app.use(cors())
 app.get('/', (req, res) => {
     let date = new Date();
     date.setDate(date.getDate() - 5)
+    console.log(date.getMonth())
     res.send(date)
 })
 
 app.post('/home', (req, res) => {
+    let date = new Date();
+    date.setDate(date.getDate() - 7);
+
     db('tests').returning('*').where('userid', req.body.userid)
+    .andWhere('time', '>', date)
     .orderBy('time', 'desc').limit(7)
     .then(results => {
         res.json(results)
