@@ -28,6 +28,14 @@ app.get('/', (req, res) => {
     res.send(date)
 })
 
+app.post('/signin', (req, res) => {
+    db('users').returning('*').where('email', req.body.signInEmail).andWhere('password', req.body.signInPassword)
+    .then(result => {
+        res.json({message: 'success', result: result[0].id})
+    })
+    .catch(err => res.status(400).json('could not find user...'))
+})
+
 app.post('/home', (req, res) => {
     let date = new Date();
     date.setDate(date.getDate() - 7);
