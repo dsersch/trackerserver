@@ -3,6 +3,7 @@ const PORT = 3001;
 require('dotenv').config()
 const cors = require('cors');
 const knex = require('knex');
+const bcrypt = require('bcryptjs');
 
 const db = knex({
     client: 'pg',
@@ -28,12 +29,30 @@ app.get('/', (req, res) => {
     res.send(date)
 })
 
+app.post('/register', (req, res) => {
+    const { email, password } = req.body;
+    bcrypt.genSalt(10, function(err, salt) {
+        bcrypt.hash(password, salt, function(err, hash) {
+            db('users').returning('*').insert({
+                email: email,
+                password: hash
+            }).then(result => {
+                res.json({message: 'success', result: result[0].id})
+            }).catch(err => res.status(400).json({message: 'user already exists...'}))
+        });
+    });
+})
+
 app.post('/signin', (req, res) => {
-    db('users').returning('*').where('email', req.body.signInEmail).andWhere('password', req.body.signInPassword)
+    db('users').returning('*').where('email', req.body.signInEmail)
     .then(result => {
-        res.json({message: 'success', result: result[0].id})
-    })
-    .catch(err => res.status(400).json('could not find user...'))
+        const hash = result[0].password
+        bcrypt.compare(req.body.signInPassword, hash, function(err, response)  {
+            response ? 
+                res.json({message: 'success', result: result[0].id}) 
+                : res.json({message: 'failed'})
+        })
+    }).catch((err) => res.status(400).json({message: 'you messed up...'}))
 })
 
 app.post('/home', (req, res) => {
