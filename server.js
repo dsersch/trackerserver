@@ -9,8 +9,8 @@ const db = knex({
     client: 'pg',
     connection: {
       host : '127.0.0.1',
-      user : 'postgres',
-      password : process.env.DB_PASS,
+      user : 'davesersch',
+    //   password : process.env.DB_PASS,
       database : 'sugartest'
     }
   });
@@ -37,7 +37,7 @@ app.post('/register', (req, res) => {
                 email: email,
                 password: hash
             }).then(result => {
-                res.json({message: 'success', result: result[0].id})
+                res.json({message: 'success', result: result[0].userid})
             }).catch(err => res.status(400).json({message: 'user already exists...'}))
         });
     });
@@ -49,7 +49,7 @@ app.post('/signin', (req, res) => {
         const hash = result[0].password
         bcrypt.compare(req.body.signInPassword, hash, function(err, response)  {
             response ? 
-                res.json({message: 'success', result: result[0].id}) 
+                res.json({message: 'success', result: result[0].userid}) 
                 : res.json({message: 'failed'})
         })
     }).catch((err) => res.status(400).json({message: 'you messed up...'}))
